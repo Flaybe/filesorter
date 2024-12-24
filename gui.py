@@ -1,14 +1,22 @@
 import tkinter as tk
 from tkinter import ttk
 from main import dirSort
+import os
+from pathlib import Path
 
 
-directories = {'Pictures' : '/Users/mateo/Pictures',
-               'Documents' : '/Users/mateo/Documents',
-               'Music' : '/Users/mateo/Music',
-               'Videos' : '/Users/mateo/Videos',
-               'Downloads' : '/Users/mateo/Downloads',
-               'Skola' : '/Users/mateo/Skola'}
+base_path = Path.home()
+print(base_path)
+
+
+
+directories = {'Pictures' : f'{base_path}/Pictures',
+               'Documents' : f'{base_path}/Documents',
+                'Music' : f'{base_path}/Music',
+                'Movies' : f'{base_path}/Movies',
+                'Downloads' : f'{base_path}/Downloads',
+                'Skola' : f'{base_path}/Skola'}
+
 
 def on_button_click():
     selected_directory = dir.get()
