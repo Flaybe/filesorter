@@ -6,8 +6,12 @@
     },
     "Skola": {
         "Path": "/Skola",
-        "Format": [],
-        "Keywords": []
+        "Format": [
+            ""
+        ],
+        "Keywords": [
+            "tddd80"
+        ]
     },
     "Labbar": {
         "Path": "/Labbar",
@@ -16,9 +20,8 @@
     },
     "Pictures": {
         "Path": "/Pictures",
-        "Format": [
-            "jpg"
-        ]
+        "Format": [],
+        "Keywords": []
     },
     "Qt": {
         "Path": "/Qt",

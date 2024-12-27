@@ -68,7 +68,8 @@ class FileSorterApp:
         def refresh_tree():
             tree.delete(*tree.get_children())
             for category, details in self.settings.items():
-                tree.insert("", "end", text=category, values=(details["Path"], ", ".join(details["Format"])))
+                print(category, details)
+                tree.insert("", "end", text=category, values=(details["Path"], ", ".join(details["Format"]), ", ".join(details["Keywords"])) )
 
         def on_select(event):
             selected = tree.focus()
@@ -86,10 +87,14 @@ class FileSorterApp:
                 entry_format.delete(0, tk.END)
                 entry_format.insert(0, ", ".join(self.settings[category]["Format"]))
 
+                entry_keywords.delete(0, tk.END)
+                entry_keywords.insert(0, ", ".join(self.settings[category]["Keywords"]))
+
         def save_edits():
             category = entry_name.get().strip()
             path = entry_path.get().strip()
             formats = [fmt.strip() for fmt in entry_format.get().split(",")]
+            keywords = [kw.strip() for kw in entry_keywords.get().split(",")]
 
             if not category or not path:
                 messagebox.showerror("Error", "Name and Path cannot be empty.")
@@ -98,17 +103,19 @@ class FileSorterApp:
             if not valid_path(path):
                 messagebox.showerror("Error", "Invalid path.")
                 return
+            try:
+                selected = tree.focus()
+                old_category = tree.item(selected)["text"]
 
-            selected = tree.focus()
-            old_category = tree.item(selected)["text"]
+                if old_category and old_category != category:
+                    self.settings[category] = self.settings.pop(old_category)
 
-            if old_category and old_category != category:
-                self.settings[category] = self.settings.pop(old_category)
-
-            self.settings[category] = {"Path": path, "Format": formats}
-            refresh_tree()
-            self.save_settings(self.settings)
-            status_field.config(text=f"Category {category} updated successfully.")
+                self.settings[category] = {"Path": path, "Format": formats, "Keywords": keywords}
+                refresh_tree()
+                self.save_settings(self.settings)
+                status_field.config(text=f"Category {category} updated successfully.")
+            except Exception as e:
+                status_field.config(text=f"Error: {e}")
 
         def add_category():
             category = entry_name.get().strip()
@@ -135,12 +142,15 @@ class FileSorterApp:
             self.save_settings(self.settings)
             status_field.config(text=f"Category {category} removed successfully.")
 
-        tree = ttk.Treeview(self.root, columns=("Path", "Formats"), show="tree headings")
+        tree = ttk.Treeview(self.root, columns=("Path", "Formats", "Keywords"), show="tree headings")
         tree.heading("#0", text="Name")
         tree.heading("Path", text="Path")
         tree.heading("Formats", text="Formats")
+        tree.heading("Keywords", text="Keywords")
         tree.column("Path", width=200)
         tree.column("Formats", width=200)
+        tree.column("Keywords", width=200)
+
         tree.bind("<<TreeviewSelect>>", on_select)
         tree.pack(fill="both", expand=True)
 
@@ -159,6 +169,11 @@ class FileSorterApp:
         tk.Label(frame, text="Formats (comma-separated):").grid(row=2, column=0, sticky="w")
         entry_format = tk.Entry(frame)
         entry_format.grid(row=2, column=1, sticky="ew")
+
+        tk.Label(frame, text="Keywords (comma-separated):").grid(row=3, column=0, sticky="w")
+        entry_keywords = tk.Entry(frame)
+        entry_keywords.grid(row=3, column=1, sticky="ew")
+
 
         frame.columnconfigure(1, weight=1)
 
