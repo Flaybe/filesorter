@@ -1,58 +1,73 @@
 {
     "Music": {
         "Path": "/Music",
-        "Format": []
+        "Format": [],
+        "Keywords": []
     },
     "Skola": {
         "Path": "/Skola",
-        "Format": []
+        "Format": [],
+        "Keywords": []
     },
     "Labbar": {
         "Path": "/Labbar",
-        "Format": []
+        "Format": [],
+        "Keywords": []
     },
     "Pictures": {
         "Path": "/Pictures",
-        "Format": []
+        "Format": [
+            "jpg"
+        ]
     },
     "Qt": {
         "Path": "/Qt",
-        "Format": []
+        "Format": [],
+        "Keywords": []
     },
     "Projekt": {
         "Path": "/Projekt",
-        "Format": []
+        "Format": [],
+        "Keywords": []
     },
     "Desktop": {
         "Path": "/Desktop",
-        "Format": []
+        "Format": [],
+        "Keywords": []
     },
     "Library": {
         "Path": "/Library",
-        "Format": []
+        "Format": [],
+        "Keywords": []
     },
     "Public": {
         "Path": "/Public",
-        "Format": []
+        "Format": [],
+        "Keywords": []
     },
     "Movies": {
         "Path": "/Movies",
-        "Format": []
+        "Format": [],
+        "Keywords": []
     },
     "Applications": {
         "Path": "/Applications",
-        "Format": []
+        "Format": [],
+        "Keywords": []
     },
     "IdeaProjects": {
         "Path": "/IdeaProjects",
-        "Format": []
+        "Format": [],
+        "Keywords": []
     },
     "Documents": {
         "Path": "/Documents",
-        "Format": []
+        "Format": [],
+        "Keywords": []
     },
     "Downloads": {
         "Path": "/Downloads",
-        "Format": []
+        "Format": [],
+        "Keywords": []
     }
 }

@@ -1,224 +1,187 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from main import dirSort
 import os
 from pathlib import Path
-import json 
-
-DEAFULT_OPTION = "Downloads"
-
-# Save the JSON file
-def save_json(data):
-    with open("settings.json", "w") as file:
-        json.dump(data, file, indent=4)
+import json
+from main import dirSort
 
 
+class FileSorterApp:
+    DEAFULT_OPTION = "Downloads"
 
-try:
-    settings = json.load(open('settings.json'))
-except:
-    settings = {}
-    for file in os.listdir(Path.home()):
-        if file.startswith("."):
-            continue
-        
-        settings[file] = {"Path": f"/{file}", "Format": []}
+    def __init__(self, root):
+        self.root = root
+        self.root.title("File Sorter")
 
+        # Load or initialize settings
+        self.base_path = Path.home()
+        self.settings = self.load_settings()
+        self.sorting = dirSort(self.base_path, self.settings)
 
+        # Initialize main menu
+        self.main_menu()
 
-    save_json(settings)
+    def load_settings(self):
+        try:
+            with open("settings.json", "r") as file:
+                return json.load(file)
+        except:
+            settings = {}
+            for file in os.listdir(self.base_path):
+                if not file.startswith("."):
+                    settings[file] = {"Path": f"/{file}", "Format": [], "Keywords" : []}
+            self.save_settings(settings)
+            return settings
 
-deafult_options = settings[DEAFULT_OPTION]
+    def save_settings(self, data):
+        with open("settings.json", "w") as file:
+            json.dump(data, file, indent=4)
 
-base_path = Path.home()
+    def sort_directory(self, directory):
+        if directory == "All":
+            for dir_name, details in self.settings.items():
+                if dir_name not in {"All", "Skola"}:
+                    self.sorting.sort(f'{self.base_path}{details["Path"]}')
+        else:
+            self.sorting.sort(f'{self.base_path}{self.settings[directory]["Path"]}')
 
-sorting = dirSort(base_path, settings)
+    def main_menu(self):
+        self.clear_window()
+        tk.Label(self.root, text="Choose a directory to sort").pack(pady=10)
+        dir_selector = ttk.Combobox(self.root, values=list(self.settings.keys()), state="readonly")
+        dir_selector.set(self.DEAFULT_OPTION)
+        dir_selector.pack(pady=10)
 
+        tk.Button(self.root, text="Sort", command=lambda: self.sort_directory(dir_selector.get())).pack(pady=10)
+        tk.Button(self.root, text="Settings", command=self.open_settings).pack(pady=10)
 
+    def open_settings(self):
+        self.clear_window()
 
-def sort(directory : str):
-    if directory == "All":
-        for directory, details in settings.items():
-            if directory == "All":
-                continue
-            if directory == "Skola":
-                continue
-            print(details)
-            sorting.sort(f'{base_path}{details["Path"]}')
-    else:
-        print("Sorting: ", f'{base_path}{settings[directory]["Path"]}')
-        sorting.sort(f'{base_path}{settings[directory]["Path"]}')
-    
+        # Keybinding for saving settings
+        self.root.bind("<Command-s>", lambda e: self.save_edits())
+        self.root.bind("<Control-s>", lambda e: self.save_edits())
 
-root = tk.Tk()
-root.title("File sorter")
+        def valid_path(path):
+            return os.path.exists(f'{self.base_path}{path}')
 
+        def refresh_tree():
+            tree.delete(*tree.get_children())
+            for category, details in self.settings.items():
+                tree.insert("", "end", text=category, values=(details["Path"], ", ".join(details["Format"])))
 
-def open_settings():
-    # Clear the current window
-    for widget in root.winfo_children():
-        widget.destroy()
+        def on_select(event):
+            selected = tree.focus()
+            if not selected:
+                return
 
-    def valid_path(path):
-        return not os.path.exists(f'{base_path}{path}')
+            category = tree.item(selected)["text"]
+            if category in self.settings:
+                entry_name.delete(0, tk.END)
+                entry_name.insert(0, category)
 
+                entry_path.delete(0, tk.END)
+                entry_path.insert(0, self.settings[category]["Path"])
 
-    # TODO Add a keybinding for saving the JSON data
-    # Keybinding for Cmd + S or Ctrl + S
-    def save_json_key(event=None):
-        save_edits(settings)
-        status_field.config(text="Settings saved successfully!")
+                entry_format.delete(0, tk.END)
+                entry_format.insert(0, ", ".join(self.settings[category]["Format"]))
 
-    root.bind("<Command-s>", save_json_key)  # For macOS
-    root.bind("<Control-s>", save_json_key)  # For Windows/Linux
+        def save_edits():
+            category = entry_name.get().strip()
+            path = entry_path.get().strip()
+            formats = [fmt.strip() for fmt in entry_format.get().split(",")]
 
-    # Refresh the Treeview
-    def refresh_tree():
-        tree.delete(*tree.get_children())  # Clear all items
-        for category, details in settings.items():
-            tree.insert("", "end", text=category, values=(details["Path"], ", ".join(details["Format"])))
+            if not category or not path:
+                messagebox.showerror("Error", "Name and Path cannot be empty.")
+                return
 
-    # Update the form fields based on selected item
-    def on_select(event):
-        selected = tree.focus()  # Get the selected item's ID
-        if not selected:
-            return
+            if not valid_path(path):
+                messagebox.showerror("Error", "Invalid path.")
+                return
 
-        category = tree.item(selected)["text"]
-        if category in settings:
-            entry_name.delete(0, tk.END)
-            entry_name.insert(0, category)
+            selected = tree.focus()
+            old_category = tree.item(selected)["text"]
 
-            entry_path.delete(0, tk.END)
-            entry_path.insert(0, settings[category]["Path"])
+            if old_category and old_category != category:
+                self.settings[category] = self.settings.pop(old_category)
 
-            entry_format.delete(0, tk.END)
-            entry_format.insert(0, ", ".join(settings[category]["Format"]))
+            self.settings[category] = {"Path": path, "Format": formats}
+            refresh_tree()
+            self.save_settings(self.settings)
+            status_field.config(text=f"Category {category} updated successfully.")
 
-    # Save edits to the JSON data
-    def save_edits():
+        def add_category():
+            category = entry_name.get().strip()
+            path = entry_path.get().strip()
+            formats = [fmt.strip() for fmt in entry_format.get().split(",")]
 
-        category = entry_name.get().strip()
-        path = entry_path.get().strip()
-        formats = [fmt.strip() for fmt in entry_format.get().split(",")]
+            if category in self.settings:
+                messagebox.showerror("Error", "Category already exists.")
+                return
 
+            self.settings[category] = {"Path": path, "Format": formats}
+            refresh_tree()
+            self.save_settings(self.settings)
+            status_field.config(text=f"Category {category} added successfully.")
 
-        if not category or not path:
-            messagebox.showerror("Error", "Name and Path cannot be empty.")
-            return
-        
-        if valid_path(path):
-            messagebox.showerror("Error", "Invalid path.")
-            return
-        
-        if category not in settings:
-            add_category(category, path, formats)
-            return
+        def remove_category():
+            selected = tree.focus()
+            if not selected:
+                return
 
-        # Update the JSON data
-        selected = tree.focus()
-        old_category = tree.item(selected)["text"]
+            category = tree.item(selected)["text"]
+            self.settings.pop(category, None)
+            refresh_tree()
+            self.save_settings(self.settings)
+            status_field.config(text=f"Category {category} removed successfully.")
 
+        tree = ttk.Treeview(self.root, columns=("Path", "Formats"), show="tree headings")
+        tree.heading("#0", text="Name")
+        tree.heading("Path", text="Path")
+        tree.heading("Formats", text="Formats")
+        tree.column("Path", width=200)
+        tree.column("Formats", width=200)
+        tree.bind("<<TreeviewSelect>>", on_select)
+        tree.pack(fill="both", expand=True)
 
-        if old_category != category and old_category:
-            print("Old category: ", old_category)
-            settings[category] = settings.pop(old_category)
+        # Editable fields
+        frame = tk.Frame(self.root)
+        frame.pack(fill="x", padx=10, pady=5)
 
-        settings[category]["Path"] = path
-        settings[category]["Format"] = formats
+        tk.Label(frame, text="Name:").grid(row=0, column=0, sticky="w")
+        entry_name = tk.Entry(frame)
+        entry_name.grid(row=0, column=1, sticky="ew")
 
-        # Update the tree
+        tk.Label(frame, text="Path:").grid(row=1, column=0, sticky="w")
+        entry_path = tk.Entry(frame)
+        entry_path.grid(row=1, column=1, sticky="ew")
+
+        tk.Label(frame, text="Formats (comma-separated):").grid(row=2, column=0, sticky="w")
+        entry_format = tk.Entry(frame)
+        entry_format.grid(row=2, column=1, sticky="ew")
+
+        frame.columnconfigure(1, weight=1)
+
+        # Buttons
+        button_frame = tk.Frame(self.root)
+        button_frame.pack(fill="x", padx=10, pady=5)
+
+        tk.Button(button_frame, text="Save Changes", command=save_edits).pack(side="left", padx=5)
+        tk.Button(button_frame, text="Add Category", command=add_category).pack(side="left", padx=5)
+        tk.Button(button_frame, text="Delete Category", command=remove_category).pack(side="left", padx=5)
+        status_field = tk.Label(button_frame, text="")
+        status_field.pack(side="left", padx=5)
+        tk.Button(button_frame, text="Go Back", command=self.main_menu).pack(side="right", padx=5)
+
+        # Populate Treeview
         refresh_tree()
-        save_json(settings)
-        status_field.config(text=f"Category {category} updated successfully.")
-    
-    def add_category(category, path, formats):
-        if category in settings:
-            messagebox.showerror("Error", "Category already exists.")
-            return
 
-        settings[category] = {"Path": path, "Format": formats}
-        refresh_tree()
-        save_json(settings)
-
-        status_field.config(text=f"Category {category} added successfully.")
-    
-    def remove_category():
-        selected = tree.focus()
-        if not selected:
-            return
-
-        category = tree.item(selected)["text"]
-        settings.pop(category, None)
-
-        
-        refresh_tree()
-        save_json(settings)
-        status_field.config(text=f"Category {category} removed successfully.")
-
-    # Treeview
-    tree = ttk.Treeview(root, columns=("Path", "Formats"), show="tree headings")
-    tree.heading("#0", text="Name")
-    tree.heading("Path", text="Path")
-    tree.heading("Formats", text="Formats")
-    tree.column("Path", width=200)
-    tree.column("Formats", width=200)
-    tree.bind("<<TreeviewSelect>>", on_select)
-    tree.pack(fill="both", expand=True)
-
-    # Editable fields
-    frame = tk.Frame(root)
-    frame.pack(fill="x", padx=10, pady=5)
-    
-
-    tk.Label(frame, text="Name:").grid(row=0, column=0, sticky="w")
-    entry_name = tk.Entry(frame)
-    entry_name.grid(row=0, column=1, sticky="ew")
-
-    tk.Label(frame, text="Path:").grid(row=1, column=0, sticky="w")
-    entry_path = tk.Entry(frame)
-    entry_path.grid(row=1, column=1, sticky="ew")
-
-    tk.Label(frame, text="Formats (comma-separated):").grid(row=2, column=0, sticky="w")
-    entry_format = tk.Entry(frame)
-    entry_format.grid(row=2, column=1, sticky="ew")
-
-    frame.columnconfigure(1, weight=1)
-
-    # Buttons
-    button_frame = tk.Frame(root)
-    button_frame.pack(fill="x", padx=10, pady=5)
-
-    tk.Button(button_frame, text="Save Changes", command=save_edits).pack(side="left", padx=5)
-    tk.Button(button_frame, text="Add Category", command=lambda: add_category(entry_name.get(), entry_path.get(), entry_format.get().split(","))).pack(side="left", padx=5)
-    tk.Button(button_frame, text="Delete Category", command=remove_category).pack(side="left", padx=5)
-    status_field = tk.Label(button_frame, text="")
-    status_field.pack(side="left", padx=5)
-    tk.Button(button_frame, text="Go Back", command=main_menu).pack(side="right", padx=5)
-
-    # Populate Treeview
-    refresh_tree()
+    def clear_window(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
 
 
-def main_menu():
-    # Clear the current window
-    for widget in root.winfo_children():
-        widget.destroy()
-
-    tk.Label(root, text="Choose a directory to sort").pack(pady=10)
-    dir = ttk.Combobox(root, values=list(settings.keys()), state='readonly')
-    dir.set(DEAFULT_OPTION)
-    dir.pack(pady=10)
-    tk.Button(root, text="Sort", command=lambda: sort(dir.get())).pack(pady=10)
-    tk.Button(root, text="Settings", command=open_settings).pack(pady=10)
-
-
-# Initialize the main menu on startup
-main_menu()
-
-
-
-
-root.mainloop()
-
-
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = FileSorterApp(root)
+    root.mainloop()
