@@ -25,45 +25,86 @@
      ```
 
 2. **Clone the Repository**:
-    ```bash
+   ```bash
    git clone https://github.com/yourusername/filesorter.git
    cd filesorter
-    ```
+   ```
 
-3. **Install dependicies
-    The project relies on built-in Python libraries, so no additional dependencies are required.
+3. **Install Dependencies**:
+   The project relies on built-in Python libraries, so no additional dependencies are required.
 
+4. **Run the Application**:
+   ```bash
+   python3 gui.py
+   ```
 
+---
 
-4. **Run the Application
-    ```bash
-    python3 gui.py
-    ```
+## Configuration
 
-5. **Configuration
+The application uses a `settings.json` file to define sorting categories, paths, and file formats. You can modify this file directly or through the GUI in the settings menu.
 
-The application uses a settings.json file to define sorting categories, paths, and file formats. You can modify this file directly or through the GUI in the settings menu.
+### Example `settings.json` File:
 
-Example settings.json File:
 ```json
-        {
-    "Pictures": {
-        "Path": "/Pictures",
-        "Format": ["jpg", "png"],
-        "Keywords": ["vacation", "family"]
-    },
-    "Documents": {
-        "Path": "/Documents",
-        "Format": ["pdf", "docx"],
-        "Keywords": ["work", "school"]
-    }
-    }
+{
+  "Pictures": {
+    "Path": "/Pictures",
+    "Format": ["jpg", "png"],
+    "Keywords": ["vacation", "family"]
+  },
+  "Documents": {
+    "Path": "/Documents",
+    "Format": ["pdf", "docx"],
+    "Keywords": ["work", "school"]
+  }
+}
 ```
 
-6. **Project Structure
-    filesorter/
-    │
-    ├── gui.py              # Main GUI application code
-    ├── main.py             # Core file sorting logic
-    ├── settings.json       # Configuration file for categories, paths, and formats
-    └── README.md           # Project documentation
+---
+
+## Usage
+
+### Main Menu
+- Select a directory to sort from the dropdown menu.
+- Click **Sort** to organize the files in the selected directory.
+- Access the **Settings** menu for more customization.
+
+### Settings Menu
+- View, add, edit, or delete sorting categories.
+- Modify file formats and paths for each category.
+- Save your changes and return to the main menu.
+
+### Keyboard Shortcuts
+- **Cmd + S** (macOS) / **Ctrl + S** (Windows/Linux): Save changes in the settings menu.
+
+---
+
+## Project Structure
+
+```
+filesorter/
+│
+├── gui.py              # Main GUI application code
+├── main.py             # Core file sorting logic
+├── settings.json       # Configuration file for categories, paths, and formats
+└── README.md           # Project documentation
+```
+
+---
+
+## Contributions
+
+This is a personal, non-profit project. Contributions and suggestions are welcome! Feel free to open an issue or submit a pull request if you have ideas for improvements.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+---
+
+## Acknowledgements
+
+- Built with ❤️ by a passionate developer to simplify file management on macOS.
