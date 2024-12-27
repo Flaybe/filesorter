@@ -45,7 +45,7 @@
 The application uses a settings.json file to define sorting categories, paths, and file formats. You can modify this file directly or through the GUI in the settings menu.
 
 Example settings.json File:
-    ```bash
+```json
         {
     "Pictures": {
         "Path": "/Pictures",
@@ -58,7 +58,7 @@ Example settings.json File:
         "Keywords": ["work", "school"]
     }
     }
-    ```
+```
 
 **Project Structure
     filesorter/
