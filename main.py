@@ -5,6 +5,7 @@ from pathlib import Path
 
 base_path = Path.home()
 
+DEBUG = False
 
 class dirSort:
 
@@ -29,7 +30,9 @@ class dirSort:
 
     def sort(self, directory):
         self.directory = directory
-        print("Sorting: ", self.directory)
+
+        if DEBUG:
+            print("Sorting: ", self.directory)
         
         for file in os.listdir(directory):
         
@@ -39,17 +42,19 @@ class dirSort:
 
             if self.is_skola(file):
                 if self.directory != f'{base_path}/Skola':
-                    #shutil.move(f'{self.directory}/{file}', f'{base_path}/Skola')
-                    print(f"Moved {file} to Skola")
+                    if DEBUG:
+                        print(f"Moving {file} to Skola")
+                    else:
+                        shutil.move(f'{self.directory}/{file}', f'{base_path}/Skola')
                     continue
             
             for dir, details in self.settings.items():
-                print("extension: ", extension)
-                print("details: ", details["Format"])
                 if extension in details["Format"]:
                     print(f"{self.directory} == {base_path}/{details['Path']}")
                     if self.directory != f'{base_path}/{details["Path"]}':
-                        #shutil.move(f'{self.directory}/{file}', f'{base_path}/{setting}')
-                        print(f"Moved {file} to {dir}")
+                        if DEBUG:
+                            print(f"Moving {file} to {dir}")
+                        else:
+                            shutil.move(f'{self.directory}/{file}', f'{base_path}/{details["Path"]}')
                         break
 
