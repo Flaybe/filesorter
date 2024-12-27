@@ -25,16 +25,45 @@
      ```
 
 2. **Clone the Repository**:
-```bash
+    ```bash
    git clone https://github.com/yourusername/filesorter.git
    cd filesorter
-```
+    ```
 
 3. **Install dependicies
     The project relies on built-in Python libraries, so no additional dependencies are required.
 
-4. **Run the Application
-```bash
-    python3 gui.py
-```
 
+
+4. **Run the Application
+    ```bash
+    python3 gui.py
+    ```
+
+**Configuration
+
+The application uses a settings.json file to define sorting categories, paths, and file formats. You can modify this file directly or through the GUI in the settings menu.
+
+Example settings.json File:
+    ```bash
+        {
+    "Pictures": {
+        "Path": "/Pictures",
+        "Format": ["jpg", "png"],
+        "Keywords": ["vacation", "family"]
+    },
+    "Documents": {
+        "Path": "/Documents",
+        "Format": ["pdf", "docx"],
+        "Keywords": ["work", "school"]
+    }
+    }
+    ```
+
+**Project Structure
+    filesorter/
+    │
+    ├── gui.py              # Main GUI application code
+    ├── main.py             # Core file sorting logic
+    ├── settings.json       # Configuration file for categories, paths, and formats
+    └── README.md           # Project documentation
