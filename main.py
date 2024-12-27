@@ -1,11 +1,16 @@
 import os
 import shutil
+import json
+from pathlib import Path
+
+base_path = Path.home()
+
 
 class dirSort:
 
-    def __init__(self, directory):
+    def __init__(self, directory, settings):
         self.directory = directory
-        self.files = os.listdir(directory)
+        self.settings = settings
 
 
     def is_skola(self, file):
@@ -22,44 +27,29 @@ class dirSort:
                 return False
         
 
-    def sort(self):
-        for file in self.files:
+    def sort(self, directory):
+        self.directory = directory
+        print("Sorting: ", self.directory)
+        
+        for file in os.listdir(directory):
+        
+            extension = file.split('.')[-1]   
+            if extension == file:
+                continue
 
-            extension = file.split('.')[-1]
-            print("Extension: ", extension)
-            
             if self.is_skola(file):
-                if self.directory != '/Users/mateo/Skola':
-                    shutil.move(f'{self.directory}/{file}', '/Users/mateo/Skola')
+                if self.directory != f'{base_path}/Skola':
+                    #shutil.move(f'{self.directory}/{file}', f'{base_path}/Skola')
+                    print(f"Moved {file} to Skola")
                     continue
-
-            match extension:
-                case 'jpg' | 'jpeg' | 'png' | 'gif':
-                    if self.directory != '/Users/mateo/Pictures':
-                        shutil.move(f'{self.directory}/{file}', '/Users/mateo/Pictures')
-                        print(f"Moved {file} to Pictures")
-                        continue
-                case 'doc' | 'docx' |  'pdf':
-                    if self.directory != '/Users/mateo/Documents':
-                        shutil.move(f'{self.directory}/{file}', '/Users/mateo/Documents')
-                        print(f"Moved {file} to Documents")
-                        continue
-                case 'mp3' | 'wav':
-                    if self.directory != '/Users/mateo/Music':
-                        shutil.move(f'{self.directory}/{file}', '/Users/mateo/Music')
-                        print(f"Moved {file} to Music")
-                        continue
-                case 'mp4' | 'avi':
-                    if self.directory != '/Users/mateo/Music':
-                        shutil.move(f'{self.directory}/{file}', '/Users/mateo/Videos')
-                        print(f"Moved {file} to Videos")
-                        continue
-                case 'zip' | 'rar':
-                    if self.directory != '/Users/mateo/Downloads':
-                        shutil.move(f'{self.directory}/{file}', '/Users/mateo/Downloads')
-                        print(f"Moved {file} to Downloads")
-                        continue
-                case _:
-                    print(f"Unknown file type: {file}")
-                    continue    
+            
+            for dir, details in self.settings.items():
+                print("extension: ", extension)
+                print("details: ", details["Format"])
+                if extension in details["Format"]:
+                    print(f"{self.directory} == {base_path}/{details['Path']}")
+                    if self.directory != f'{base_path}/{details["Path"]}':
+                        #shutil.move(f'{self.directory}/{file}', f'{base_path}/{setting}')
+                        print(f"Moved {file} to {dir}")
+                        break
 

@@ -1,0 +1,37 @@
+{"Settings" : {
+    "Pictures" : {
+        "Path" : "/Pictures",
+        "Format" : ["jpg", "png", "jpeg"]
+    },
+    "Music" : {
+        "Path" : "/Music",
+        "Format" : ["mp3", "wav"]
+    },
+    "Movies" : {
+        "Path" : "/Movies",
+        "Format" : ["mp4", "avi"]
+    },
+    "Documents" : {
+        "Path" : "/Documents",
+        "Format" : ["pdf", "docx"]
+    },
+    "Skola" : {
+        "Path" : "/Skola",
+        "Format" : []
+    },
+    "Downloads" : {
+        "Path" : "/Downloads",
+        "Format" : []
+    },
+    "All" : {
+        "Path" : "",
+        "Format" : []
+    }
+
+},
+"Deafult_path" : {
+    "Name" : "Downloads",
+    "Path" : "/Downloads"
+}
+
+}

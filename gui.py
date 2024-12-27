@@ -3,40 +3,53 @@ from tkinter import ttk
 from main import dirSort
 import os
 from pathlib import Path
+import json 
+
+settings = json.load(open('settings.json'))
+deafult_options = settings["Deafult_path"]
+settings = settings["Settings"]
 
 
 base_path = Path.home()
-print(base_path)
+
+sorting = dirSort(base_path, settings)
 
 
 
-directories = {'Pictures' : f'{base_path}/Pictures',
-               'Documents' : f'{base_path}/Documents',
-                'Music' : f'{base_path}/Music',
-                'Movies' : f'{base_path}/Movies',
-                'Downloads' : f'{base_path}/Downloads',
-                'Skola' : f'{base_path}/Skola'}
+def open_settings():
+    os.system("open settings.json")
 
 
-def on_button_click():
+
+def sort():
     selected_directory = dir.get()
-    dirSort(directories[selected_directory]).sort()
+    if selected_directory == "All":
+        for directory, details in settings.items():
+            if directory == "All":
+                continue
+            if directory == "Skola":
+                continue
+            print(details)
+            sorting.sort(f'{base_path}{details["Path"]}')
+    else:
+        print("Sorting: ", f'{base_path}{settings[selected_directory]["Path"]}')
+        sorting.sort(f'{base_path}{settings[selected_directory]["Path"]}')
     
-
-def on_selection_change(event):
-    if dir.get() != "Choose directory":
-        button.pack(pady=10)  # Show the button
-
 
 root = tk.Tk()
 root.title("File sorter")
 
 tk.Label(root, text="Choose a directory to sort").pack(pady=10)
-dir = ttk.Combobox(root, values=list(directories.keys()), state='readonly')
-dir.set('Choose directory')
+dir = ttk.Combobox(root, values=list(settings.keys()), state='readonly')
+dir.set(deafult_options["Name"])
 dir.pack(pady=10)
 
-dir.bind("<<ComboboxSelected>>", on_selection_change)
-button = tk.Button(root, text="Sort", command=on_button_click)
+# Not used have deafult value instead
+# dir.bind("<<ComboboxSelected>>", on_selection_change)
+sort_button = tk.Button(root, text="Sort", command=sort)
+sort_button.pack(pady=10)
+
+settings_button = tk.Button(root, text="Settings", command=open_settings)
+settings_button.pack(pady=10)
 
 root.mainloop()
