@@ -40,7 +40,7 @@
     python3 gui.py
     ```
 
-**Configuration
+5. **Configuration
 
 The application uses a settings.json file to define sorting categories, paths, and file formats. You can modify this file directly or through the GUI in the settings menu.
 
@@ -60,7 +60,7 @@ Example settings.json File:
     }
 ```
 
-**Project Structure
+6. **Project Structure
     filesorter/
     │
     ├── gui.py              # Main GUI application code
