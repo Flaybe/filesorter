@@ -17,38 +17,14 @@ def save_json(data):
 try:
     settings = json.load(open('settings.json'))
 except:
-    # Create a default settings file
-    settings = {
-    "Pictures" : {
-        "Path" : "/Pictures",
-        "Format" : ["jpg", "png", "jpeg"]
-    },
-    "Music" : {
-        "Path" : "/Music",
-        "Format" : ["mp3", "wav"]
-    },
-    "Movies" : {
-        "Path" : "/Movies",
-        "Format" : ["mp4", "avi"]
-    },
-    "Documents" : {
-        "Path" : "/Documents",
-        "Format" : ["pdf", "docx"]
-    },
-    "Skola" : {
-        "Path" : "/Skola",
-        "Format" : []
-    },
-    "Downloads" : {
-        "Path" : "/Downloads",
-        "Format" : []
-    },
-    "All" : {
-        "Path" : "/",
-        "Format" : []
-    }
+    settings = {}
+    for file in os.listdir(Path.home()):
+        if file.startswith("."):
+            continue
+        
+        settings[file] = {"Path": f"/{file}", "Format": []}
 
-}
+
 
     save_json(settings)
 
@@ -83,7 +59,12 @@ def open_settings():
     for widget in root.winfo_children():
         widget.destroy()
 
-        # Keybinding for Cmd + S or Ctrl + S
+    def valid_path(path):
+        return not os.path.exists(f'{base_path}{path}')
+
+
+    # TODO Add a keybinding for saving the JSON data
+    # Keybinding for Cmd + S or Ctrl + S
     def save_json_key(event=None):
         save_edits(settings)
         status_field.config(text="Settings saved successfully!")
