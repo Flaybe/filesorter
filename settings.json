@@ -10,7 +10,8 @@
             ""
         ],
         "Keywords": [
-            "tddd80"
+            "tddd80",
+            "tsea24"
         ]
     },
     "Labbar": {
@@ -20,11 +21,6 @@
     },
     "Pictures": {
         "Path": "/Pictures",
-        "Format": [],
-        "Keywords": []
-    },
-    "Qt": {
-        "Path": "/Qt",
         "Format": [],
         "Keywords": []
     },

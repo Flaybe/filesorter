@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import json
 from main import dirSort
+import shutil
 
 
 class FileSorterApp:
@@ -17,15 +18,18 @@ class FileSorterApp:
         self.base_path = Path.home()
         self.settings = self.load_settings()
         self.sorting = dirSort(self.base_path, self.settings)
+        self.safe_moves = False
 
         # Initialize main menu
         self.main_menu()
 
     def load_settings(self):
+        # Load settings from file
         try:
             with open("settings.json", "r") as file:
                 return json.load(file)
         except:
+            # Initialize settings to the user's home directory
             settings = {}
             for file in os.listdir(self.base_path):
                 if not file.startswith("."):
@@ -37,13 +41,82 @@ class FileSorterApp:
         with open("settings.json", "w") as file:
             json.dump(data, file, indent=4)
 
+    def toggle_safe_moves(self):
+        self.safe_moves = not self.safe_moves
+
     def sort_directory(self, directory):
         if directory == "All":
+            moves = []
             for dir_name, details in self.settings.items():
                 if dir_name not in {"All", "Skola"}:
-                    self.sorting.sort(f'{self.base_path}{details["Path"]}')
+                    moves.extend(self.sorting.sort(f'{self.base_path}{details["Path"]}'))
         else:
-            self.sorting.sort(f'{self.base_path}{self.settings[directory]["Path"]}')
+            moves = self.sorting.sort(f'{self.base_path}{self.settings[directory]["Path"]}')
+
+        if moves:
+            print(self.safe_moves)
+            if self.safe_moves:
+                self.show_confirmation_window(moves)
+            else:
+                for move in moves:
+                    try:
+                        shutil.move(move[0], move[1])
+                    except Exception as e:
+                        messagebox.showerror("Error", f"Failed to move {move[0]}: {e}")
+        else:
+            messagebox.showinfo("Info", "No files to move.")
+
+
+    def show_confirmation_window(self, moves):
+        num_items = len(moves)
+        processed_items = 0
+        # Create a pop-up window
+        confirmation_window = tk.Toplevel(self.root)
+        confirmation_window.title("Confirm File Moves")
+
+        # Table frame
+        table = tk.Frame(confirmation_window)  # Define `table` here
+        table.grid(row=1, column=0, columnspan=3, sticky="nsew")
+
+        # Function to handle file acceptance
+        def accept_move(index):
+            move = moves[index]
+            try:
+                shutil.move(move[0], move[1])  # Perform the move
+                for widget in table.grid_slaves(row=index):  # Remove the row
+                    widget.destroy()
+                nonlocal processed_items
+                processed_items += 1
+                if num_items <= processed_items:  # Close the window if all moves are done
+                    confirmation_window.destroy()
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to move {move[0]}: {e}")
+
+        # Function to reject a move
+        def reject_move(index):
+            for widget in table.grid_slaves(row=index):  # Remove the row
+                widget.destroy()
+            nonlocal processed_items
+            processed_items += 1
+            if num_items <= processed_items:  # Close the window if all moves are done
+                confirmation_window.destroy()
+
+        # Table header
+        tk.Label(confirmation_window, text="Source", width=30, anchor="w").grid(row=0, column=0, padx=5, pady=5)
+        tk.Label(confirmation_window, text="Destination", width=30, anchor="w").grid(row=0, column=1, padx=5, pady=5)
+        tk.Label(confirmation_window, text="Action", width=30, anchor="w").grid(row=0, column=2, padx=5, pady=5)
+
+        # Table rows
+        for index, move in enumerate(moves):
+            source_label = tk.Label(table, text=move[0], width=30, anchor="w")
+            destination_label = tk.Label(table, text=move[1], width=30, anchor="w")
+            accept_button = tk.Button(table, text="Accept", command=lambda idx=index: accept_move(idx))
+            reject_button = tk.Button(table, text="Reject", command=lambda idx=index: reject_move(idx))
+
+            source_label.grid(row=index, column=0, padx=5, pady=5)
+            destination_label.grid(row=index, column=1, padx=5, pady=5)
+            accept_button.grid(row=index, column=2, padx=5, pady=5)
+            reject_button.grid(row=index, column=3, padx=5, pady=5)        
 
     def main_menu(self):
         self.clear_window()
@@ -54,6 +127,10 @@ class FileSorterApp:
 
         tk.Button(self.root, text="Sort", command=lambda: self.sort_directory(dir_selector.get())).pack(pady=10)
         tk.Button(self.root, text="Settings", command=self.open_settings).pack(pady=10)
+        tk.Checkbutton(self.root, text="Safe Moves", command=self.toggle_safe_moves).pack(pady=10)
+        
+
+
 
     def open_settings(self):
         self.clear_window()
@@ -143,7 +220,6 @@ class FileSorterApp:
             status_field.config(text=f"Category {category} removed successfully.")
 
         tree = ttk.Treeview(self.root, columns=("Path", "Formats", "Keywords"), show="tree headings")
-        tree.heading("#0", text="Name")
         tree.heading("Path", text="Path")
         tree.heading("Formats", text="Formats")
         tree.heading("Keywords", text="Keywords")
@@ -188,6 +264,7 @@ class FileSorterApp:
         status_field.pack(side="left", padx=5)
         tk.Button(button_frame, text="Go Back", command=self.main_menu).pack(side="right", padx=5)
 
+        
         # Populate Treeview
         refresh_tree()
 
