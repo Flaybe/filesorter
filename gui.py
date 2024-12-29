@@ -18,7 +18,7 @@ class FileSorterApp:
         self.base_path = Path.home()
         self.settings = self.load_settings()
         self.sorting = dirSort(self.base_path, self.settings)
-        self.safe_moves = False
+        self.safe_moves = tk.BooleanVar(value=True)
 
         # Initialize main menu
         self.main_menu()
@@ -45,16 +45,11 @@ class FileSorterApp:
         self.safe_moves = not self.safe_moves
 
     def sort_directory(self, directory):
-        if directory == "All":
-            moves = []
-            for dir_name, details in self.settings.items():
-                if dir_name not in {"All", "Skola"}:
-                    moves.extend(self.sorting.sort(f'{self.base_path}{details["Path"]}'))
-        else:
-            moves = self.sorting.sort(f'{self.base_path}{self.settings[directory]["Path"]}')
+
+        moves = self.sorting.sort(f'{self.base_path}{self.settings[directory]["Path"]}')
+        print("# Moves: " , len(moves))
 
         if moves:
-            print(self.safe_moves)
             if self.safe_moves:
                 self.show_confirmation_window(moves)
             else:
@@ -127,9 +122,8 @@ class FileSorterApp:
 
         tk.Button(self.root, text="Sort", command=lambda: self.sort_directory(dir_selector.get())).pack(pady=10)
         tk.Button(self.root, text="Settings", command=self.open_settings).pack(pady=10)
-        tk.Checkbutton(self.root, text="Safe Moves", command=self.toggle_safe_moves).pack(pady=10)
-        
 
+        tk.Checkbutton(self.root, text="Safe Moves", variable=self.safe_moves, command=self.toggle_safe_moves).pack(pady=10)
 
 
     def open_settings(self):
@@ -166,6 +160,7 @@ class FileSorterApp:
 
                 entry_keywords.delete(0, tk.END)
                 entry_keywords.insert(0, ", ".join(self.settings[category]["Keywords"]))
+
 
         def save_edits():
             category = entry_name.get().strip()
